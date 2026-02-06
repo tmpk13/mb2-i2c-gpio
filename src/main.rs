@@ -14,9 +14,9 @@ use panic_rtt_target as _;
 use embedded_hal::i2c::{I2c, Error};
 
 // Pin
-// 5   :   0000 100
+// 4   :   0000 1000
 // Hex     0x10
-
+const i: u8 = 0x80;
 
 const ADDR: u8 = 0x20;
 pub struct GpioExpander<I2C> {
