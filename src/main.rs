@@ -16,6 +16,16 @@ use embedded_hal::i2c::{I2c, Error};
 // 0x03
 const H: u8 = 0x42;
 
+enum Pins {
+    P0 = 0x01,
+    P1 = 0x02,
+    P2 = 0x04,
+    P3 = 0x08,
+    P4 = 0x10,
+    P5 = 0x20,
+    P6 = 0x40,
+    P7 = 0x80,
+}
 
 const ADDR: u8 = 0x20;
 pub struct GpioExpander<I2C> {
@@ -42,8 +52,18 @@ impl<I2C: I2c> GpioExpander<I2C> {
         Ok(temp[0])
     }
 
-    pub fn pin_to_hex(&self, pin: u32) -> u32 {
-        2u32.pow(pin-1).clone()
+    pub fn pin_to_hex(&self, pin: u8) -> u8 {
+        2u8.pow((pin as u32) - 1)
+    }
+
+    pub fn pins_to_hex(&self, pins: &[u8]) -> u8 {
+        let mut value: u8 = 0x00;
+        // Add up pins
+        for pin in 0usize..8usize { 
+            value += 2u8.pow((pins[pin] as u32) - 1);
+        }
+        // value = pins.iter().map(|x| value + x);
+        value
     }
 }
 
