@@ -51,7 +51,7 @@ Uses `big-endian` bit ordering 7 -> 0
  |---|---|---|---|---|---|---|---|
 
 
-To turn on only one led
+### To turn on only one led
  |Pin \# | binary | hex |
  |---|---|---|
  | 0 | 0000 0001 | 0x01 |
@@ -63,6 +63,11 @@ To turn on only one led
  | 6 | 0100 0000 | 0x40 |
  | 7 | 1000 0000 | 0x80 |
 
+### To turn on multiple leds
+ |Pin \# | binary | hex | sum |
+ |---|---|---|---|
+ | 0 & 1 | 0000 0011 | 0x01 + 0x02 | 0x03 |
+ | 1 & 6 | 0100 0010 | 0x02 + 0x40 | 0x42 |
 
 
 
