@@ -48,19 +48,27 @@ impl<I2C: I2c> GpioExpander<I2C> {
         Ok(())
     }
 
+    pub fn write_pins(&mut self, pin_values: &[u8]) -> Result<(), I2C::Error> {
+        self.i2c.write(ADDR, &[self.pins_to_hex(pin_values)])?;
+        Ok(())
+    }
+
     pub fn pin_to_hex(&self, pin: u8) -> u8 {
         2u8.pow((pin as u32) - 1)
     }
 
     pub fn pins_to_hex(&self, pins: &[u8]) -> u8 {
-        let mut value: u8 = 0x00;
         // Add up pins
         // for pin in 0usize..8usize {
         //     value += 2u8.pow((pins[pin] as u32) - 1);
         // }
-        value = pins.iter().fold(
-            0, 
-            |sum, pin| sum + 2u8.pow((*pin-1) as u32)
+        let value = pins.iter().enumerate().fold(0, |sum, (index, pin)| sum +
+            if *pin == 1 {
+                rprintln!("added {} {}", pin, 2u8.pow(index as u32));
+                2u8.pow(index as u32)
+            } else {
+                0
+            }
         );
         value
     }
@@ -86,22 +94,27 @@ fn init() -> ! {
     let mut gpio = GpioExpander::new(i2c);
 
     let mut state = State::LedOff;
-
-    assert_eq!(gpio.pin_to_hex(5), 0b0001_0000);
+    
+    #[cfg(test)]
+    {
+        assert_eq!(gpio.pin_to_hex(5), 0b0001_0000);
+        assert_eq!(gpio.pins_to_hex(&[0, 1, 1, 1, 0, 0, 0, 0]), 0b0000_1110);
+    }
+    gpio.write_pins(&[0, 1, 1, 1, 1]);
 
     loop {
-        state = match state {
-            State::LedOff => {
-                gpio.high();
-                rprintln!("high");
-                State::LedOn
-            }
-            State::LedOn => {
-                gpio.low();
-                rprintln!("low");
-                State::LedOff
-            }
-        };
-        timer.delay_ms(500);
+        // state = match state {
+        //     State::LedOff => {
+        //         gpio.high();
+        //         rprintln!("high");
+        //         State::LedOn
+        //     }
+        //     State::LedOn => {
+        //         gpio.low();
+        //         rprintln!("low");
+        //         State::LedOff
+        //     }
+        // };
+        // timer.delay_ms(500);
     }
 }
