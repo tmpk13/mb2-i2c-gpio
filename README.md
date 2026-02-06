@@ -27,3 +27,18 @@ impl<I2C: I2c> TemperatureSensorDriver<I2C> {
 ![i2c address table for A0, A1, A2](image.png)
 ![i2c interface definitions](image-2.png)
 ![Write Mode timing](image-3.png)
+
+
+Address for the IC 
+```
+4 set bits
+\/   
+LHLL LLL (A2 A1 A0 LLL)
+     /\
+     3 config bits
+Total 7 bit address
+
+0100 000 : 0x20
+```
+
+# Set a specific pin
