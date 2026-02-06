@@ -42,3 +42,32 @@ Total 7 bit address
 ```
 
 # Set a specific pin
+*Example: Set pin 5 high*
+
+The PCF8574P has 8 gpio pins
+
+Uses `big-endian` bit ordering 8 -> 1
+
+To turn on only one led
+ |Pin \# | binary |
+ |---|---|
+ | 0 | 0000 0001 | 0xF0 |
+ | 1 | 0000 0010 | 0xF1 |
+ | 2 | 0000 0100 |  |
+ | 3 | 0000 1000 |  |
+ | 4 | 0001 0000 |  |
+ | 5 | 0010 0000 |  |
+ | 6 | 0100 0000 |  |
+ | 7 | 1000 0000 |  |
+
+ |\# | binary |
+ |---|---|
+ | 0 | xxxx xxx1 |
+ | 1 | xxxx xx1x |
+ | 2 | xxxx x1xx |
+ | 3 | xxxx 1xxx |
+ | 4 | xxx1 xxxx |
+ | 5 | xx1x xxxx |
+ | 6 | x1xx xxxx |
+ | 7 | 1xxx xxxx |
+

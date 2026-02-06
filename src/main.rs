@@ -15,7 +15,7 @@ use embedded_hal::i2c::{I2c, Error};
 
 // Pin
 // 5   :   0000 100
-// Hex     0x16
+// Hex     0x10
 
 
 const ADDR: u8 = 0x20;
@@ -44,7 +44,6 @@ impl<I2C: I2c> GpioExpander<I2C> {
     }
 
     pub fn pin_to_hex(&self, pin: u32) -> u32 {
-        // 5 -> 16
         2u32.pow(pin-1).clone()
     }
 }
@@ -68,7 +67,7 @@ fn init() -> ! {
     let mut state = State::LedOff;
 
 
-    assert_eq!(gpio.pin_to_hex(5), 0b001_0000);
+    assert_eq!(gpio.pin_to_hex(5), 0b0001_0000);
 
 
     loop {
