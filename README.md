@@ -1,6 +1,9 @@
-# MB2 i2c gpio expander
+# MB2 I2C gpio expander 
 
-[Embedded Hal Docs](https://docs.rs/embedded-hal/latest/embedded_hal/i2c/index.html)
+Using the PCF8574P GPIO expander with the Microbit V2 over I2C
+
+## Example of using embbedded hal with i2c
+[Embedded Hal i2c Docs](https://docs.rs/embedded-hal/latest/embedded_hal/i2c/index.html)
 ``` Rust
 use embedded_hal::i2c::{I2c, Error};
 
@@ -22,14 +25,31 @@ impl<I2C: I2c> TemperatureSensorDriver<I2C> {
 }
 ```
 
-[TI GPIO expander data sheet](https://www.ti.com/lit/ds/symlink/pcf8574.pdf)
-![GPIO chip pinout for n/dw pkg](image-1.png)
-![i2c address table for A0, A1, A2](image.png)
-![i2c interface definitions](image-4.png)
-![Write Mode timing](image-3.png)
+# PCF8574  
+**Pinout**  
+![GPIO chip pinout for n/dw pkg](imgs/image-1.png)  
+[TI GPIO expander data sheet](https://www.ti.com/lit/ds/symlink/pcf8574.pdf)  
 
 
-Address for the IC 
+
+
+# I2C
+
+![i2c address table for A0, A1, A2](imgs/image.png)  
+[TI GPIO expander data sheet](https://www.ti.com/lit/ds/symlink/pcf8574.pdf)  
+
+---
+
+![i2c interface definitions](imgs/image-4.png)  
+[TI GPIO expander data sheet](https://www.ti.com/lit/ds/symlink/pcf8574.pdf)  
+
+---
+
+![Write Mode timing](imgs/image-3.png)  
+[TI GPIO expander data sheet](https://www.ti.com/lit/ds/symlink/pcf8574.pdf)  
+---
+
+## Address for the IC 
 ```
 4 set bits
 \/   
@@ -41,19 +61,23 @@ Total 7 bit address
 0100 000 : 0x20
 ```
 
-# Set a specific pin
-*Example: Set pin 5 high*
+## Set a specific pin
 
-The PCF8574P has 8 gpio pins
 
-Uses `big-endian` bit ordering 7 -> 0
- | P7 | P6 | P5 | P4 | P3 | P2 | P1 | P0 |
- |---|---|---|---|---|---|---|---|
 
-Turning on P5  
-![alt text](image-5.png)
+Uses `big-endian` bit ordering 7 -> 0  
+| P7 | P6 | P5 | P4 | P3 | P2 | P1 | P0 |
 
-### To turn on only one led
+
+---
+
+**Setting P5 high**  
+
+![alt text](imgs/image-5.png)
+
+---
+
+### Setting a single pin
  |Pin \# | binary | hex |
  |---|---|---|
  | 0 | 0000 0001 | 0x01 |
@@ -65,13 +89,14 @@ Turning on P5
  | 6 | 0100 0000 | 0x40 |
  | 7 | 1000 0000 | 0x80 |
 
-### To turn on multiple leds
+### To set multiple pins
  |Pin \# | binary | hex | sum |
  |---|---|---|---|
  | 0 & 1 | 0000 0011 | 0x01 + 0x02 | 0x03 |
  | 1 & 6 | 0100 0010 | 0x02 + 0x40 | 0x42 |
 
 
+<!-- 
 
  |\# | binary |
  |---|---|
@@ -82,5 +107,5 @@ Turning on P5
  | 4 | xxx1 xxxx |
  | 5 | xx1x xxxx |
  | 6 | x1xx xxxx |
- | 7 | 1xxx xxxx |
+ | 7 | 1xxx xxxx | -->
 
