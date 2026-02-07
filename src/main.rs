@@ -133,24 +133,11 @@ fn init() -> ! {
 
     loop {
         
-        cycle(&mut timer, &[P4, P5, P6], &mut gpio);
+        match cycle(&mut timer, &[P4, P5, P6], &mut gpio) {
+            Ok(()) => {}
+            Err(e) => { rprintln!("I2C failed {:?}", e) }
+        }
         
-
-        // gpio.write(!pin-1 & !P5);
-        // d!(500);
-
-        // gpio.write(!P4);
-        // d!(500);
-
-        // gpio.write(!P4 & !P5);
-        // d!(500);
-
-        // gpio.write(!P5);
-        // d!(500);
-
-        // gpio.write(!P5 & !P6);
-        // d!(500);
-
         // gpio.write(!P6);
         // d!(500);
 
@@ -158,9 +145,6 @@ fn init() -> ! {
         // d!(500);
 
         // gpio.write_pins_delay(&[1, 1, 1, 1, 1, 0, 1, 1], 100, &mut timer);
-        // gpio.write_pins_delay(&[1, 1, 1, 1, 1, 0, 1, 1], 100, &mut timer);
-        // gpio.write_pins_delay(&[1, 1, 1, 1, 0, 1, 1, 1], 100, &mut timer);
-        // gpio.write_pins_delay(&[1, 1, 1, 1, 1, 1, 0, 1], 100, &mut timer);
 
         // gpio.off();
 
