@@ -51,7 +51,7 @@ Uses `big-endian` bit ordering 7 -> 0
  |---|---|---|---|---|---|---|---|
 
 Turning on P5  
-![Data bits](image-2.png)
+![alt text](image-5.png)
 
 ### To turn on only one led
  |Pin \# | binary | hex |
