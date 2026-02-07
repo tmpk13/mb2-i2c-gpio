@@ -111,25 +111,26 @@ fn init() -> ! {
         };
     }
 
-    /// Handel i2c errors
-    macro_rules! i2c_error {
-        ($op:expr) => {
-            match $op {
-                Ok(v) => { v }
-                Err(e) => { rprintln!("i2c failure {:?}", e); }
-            }
-        };
+    // Cycle though the colors
+    fn cycle<T>(pins: &[u8], gpio: &mut GpioExpander<T>) -> Result<(), i2c::ErrorKind> {
+        pins.iter().enumerate().for_each(|(i, x)| {
+            gpio.write(!x)?;
+            d!(500);
+            gpio.write(!x & !pins[(i + 1) % pins.len()])?;
+            d!(500);
+        });
+        Ok(())
     }
 
     loop {
         let pins = [P4, P5, P6];
 
-        let _ = pins.iter().enumerate().for_each(|(i, x)| {
-            i2c_error!(gpio.write(!x));
-            d!(500);
-            i2c_error!(gpio.write(!x & !pins[(i + 1) % pins.len()]));
-            d!(500)
-        });
+        
+
+        // match op {
+        //     (v) => { v }
+        //     Err(e) => { rprintln!("i2c failure {:?}", e); }
+        // }
 
         // gpio.write(!pin);
         // d!(500);
