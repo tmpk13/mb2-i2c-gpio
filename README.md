@@ -2,28 +2,6 @@
 
 Using the PCF8574P GPIO expander with the Microbit V2 over I2C
 
-## Example of using embbedded hal with i2c
-[Embedded Hal i2c Docs](https://docs.rs/embedded-hal/latest/embedded_hal/i2c/index.html)
-``` Rust
-use embedded_hal::i2c::{I2c, Error};
-
-const ADDR: u8 = 0x15;
-pub struct TemperatureSensorDriver<I2C> {
-    i2c: I2C,
-}
-
-impl<I2C: I2c> TemperatureSensorDriver<I2C> {
-    pub fn new(i2c: I2C) -> Self {
-        Self { i2c }
-    }
-
-    pub fn read_temperature(&mut self) -> Result<u8, I2C::Error> {
-        let mut temp = [0];
-        self.i2c.write_read(ADDR, &[TEMP_REGISTER], &mut temp)?;
-        Ok(temp[0])
-    }
-}
-```
 
 # PCF8574  
 **Pinout**  
@@ -95,6 +73,30 @@ Uses `big-endian` bit ordering 7 -> 0
  | 0 & 1 | 0000 0011 | 0x01 + 0x02 | 0x03 |
  | 1 & 6 | 0100 0010 | 0x02 + 0x40 | 0x42 |
 
+## Example of using embbedded hal with i2c
+[Embedded Hal i2c Docs](https://docs.rs/embedded-hal/latest/embedded_hal/i2c/index.html)
+``` Rust
+use embedded_hal::i2c::{I2c, Error};
+
+const ADDR: u8 = 0x15;
+pub struct TemperatureSensorDriver<I2C> {
+    i2c: I2C,
+}
+
+impl<I2C: I2c> TemperatureSensorDriver<I2C> {
+    pub fn new(i2c: I2C) -> Self {
+        Self { i2c }
+    }
+
+    pub fn read_temperature(&mut self) -> Result<u8, I2C::Error> {
+        let mut temp = [0];
+        self.i2c.write_read(ADDR, &[TEMP_REGISTER], &mut temp)?;
+        Ok(temp[0])
+    }
+}
+```
+
+[GIF of cycling led](https://github.com/tmpk13/mb2-i2c-gpio/blob/main/imgs/PXL_20260207_014600567~22.gif)
 
 <!-- 
 
