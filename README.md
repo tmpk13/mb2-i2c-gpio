@@ -72,6 +72,7 @@ Turning on P5
  | 1 & 6 | 0100 0010 | 0x02 + 0x40 | 0x42 |
 
 
+<!-- 
 
  |\# | binary |
  |---|---|
@@ -82,5 +83,5 @@ Turning on P5
  | 4 | xxx1 xxxx |
  | 5 | xx1x xxxx |
  | 6 | x1xx xxxx |
- | 7 | 1xxx xxxx |
+ | 7 | 1xxx xxxx | -->
 
