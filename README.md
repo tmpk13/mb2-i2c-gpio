@@ -25,7 +25,7 @@ impl<I2C: I2c> TemperatureSensorDriver<I2C> {
 [TI GPIO expander data sheet](https://www.ti.com/lit/ds/symlink/pcf8574.pdf)
 ![GPIO chip pinout for n/dw pkg](image-1.png)
 ![i2c address table for A0, A1, A2](image.png)
-![i2c interface definitions](image-2.png)
+![i2c interface definitions](image-4.png)
 ![Write Mode timing](image-3.png)
 
 
