@@ -8,6 +8,7 @@ use embedded_hal::{delay::DelayNs, digital::OutputPin, i2c};
 use microbit::{
     board::{Board, I2CExternalPins},
     hal::{timer::Timer, twim},
+    pac::TIMER0,
 };
 use panic_rtt_target as _;
 use rtt_target::{rprintln, rtt_init_print};
@@ -94,6 +95,7 @@ fn init() -> ! {
         board.i2c_external.into(),
         twim::Frequency::K100,
     );
+
     let mut gpio = GpioExpander::new(i2c);
 
     let mut state = State::LedOff;
@@ -112,30 +114,27 @@ fn init() -> ! {
     }
 
     // Cycle though the colors
-    fn cycle<T>(pins: &[u8], gpio: &mut GpioExpander<T>) -> Result<(), i2c::ErrorKind> {
-        pins.iter().enumerate().for_each(|(i, x)| {
+    fn cycle<T>(
+        timer: &mut Timer<TIMER0>,
+        pins: &[u8],
+        gpio: &mut GpioExpander<T>,
+    ) -> Result<(), T::Error>
+    where
+        T: I2c,
+    {
+        for (i, x) in pins.iter().enumerate() {
             gpio.write(!x)?;
-            d!(500);
+            timer.delay_ms(500);
             gpio.write(!x & !pins[(i + 1) % pins.len()])?;
-            d!(500);
-        });
+            timer.delay_ms(500);
+        }
         Ok(())
     }
 
     loop {
-        let pins = [P4, P5, P6];
-
         
-
-        // match op {
-        //     (v) => { v }
-        //     Err(e) => { rprintln!("i2c failure {:?}", e); }
-        // }
-
-        // gpio.write(!pin);
-        // d!(500);
-
-        // pin += 0x1;
+        cycle(&mut timer, &[P4, P5, P6], &mut gpio);
+        
 
         // gpio.write(!pin-1 & !P5);
         // d!(500);
