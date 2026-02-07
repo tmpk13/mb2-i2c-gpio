@@ -50,7 +50,7 @@ Uses `big-endian` bit ordering 7 -> 0
  | P7 | P6 | P5 | P4 | P3 | P2 | P1 | P0 |
  |---|---|---|---|---|---|---|---|
 
-Turning on P5
+Turning on P5  
 ![Data bits](image-2.png)
 
 ### To turn on only one led
