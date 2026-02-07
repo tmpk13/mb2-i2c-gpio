@@ -1,26 +1,30 @@
 #![no_main]
 #![no_std]
 
-// https://github.com/pdx-cs-rust-embedded/blinky-rs/
 use cortex_m_rt::entry;
-use embedded_hal::i2c::{Error, I2c};
-use embedded_hal::{delay::DelayNs, digital::OutputPin, i2c};
+use embedded_hal::delay::DelayNs;
+use embedded_hal::i2c::I2c;
 use microbit::{
-    board::{Board, I2CExternalPins},
+    board::Board,
     hal::{timer::Timer, twim},
     pac::TIMER0,
 };
 use panic_rtt_target as _;
 use rtt_target::{rprintln, rtt_init_print};
 
-const P0: u8 = 0x01;
-const P1: u8 = 0x02;
-const P2: u8 = 0x04;
-const P3: u8 = 0x08;
-const P4: u8 = 0x10;
-const P5: u8 = 0x20;
-const P6: u8 = 0x40;
-const P7: u8 = 0x80;
+
+// Pin definitions
+#[allow(unused)]
+mod pins {
+    pub const P0: u8 = 0x01;
+    pub const P1: u8 = 0x02;
+    pub const P2: u8 = 0x04;
+    pub const P3: u8 = 0x08;
+    pub const P4: u8 = 0x10;
+    pub const P5: u8 = 0x20;
+    pub const P6: u8 = 0x40;
+    pub const P7: u8 = 0x80;
+}
 
 const ADDR: u8 = 0x20;
 pub struct GpioExpander<I2C> {
@@ -31,39 +35,34 @@ impl<I2C: I2c> GpioExpander<I2C> {
         Self { i2c }
     }
 
+    /// Set all low
     pub fn on(&mut self) -> Result<(), I2C::Error> {
         self.i2c.write(ADDR, &[0x00])?;
         Ok(())
     }
+    /// Set all high
     pub fn off(&mut self) -> Result<(), I2C::Error> {
         self.i2c.write(ADDR, &[0xFF])?;
         Ok(())
     }
+    /// Write 8 bits to i2c device
     pub fn write(&mut self, value: u8) -> Result<(), I2C::Error> {
         self.i2c.write(ADDR, &[value])?;
         Ok(())
     }
 
+    /// Write High/Low bits to i2c device from list of bits for pins [1, ..., 1]
     pub fn write_pins(&mut self, pin_values: &[u8]) -> Result<(), I2C::Error> {
         self.i2c.write(ADDR, &[self.pins_to_hex(pin_values)])?;
         Ok(())
     }
 
-    pub fn write_pins_delay(
-        &mut self,
-        pin_values: &[u8],
-        delay: u32,
-        timer: &mut Timer<microbit::pac::TIMER0>,
-    ) -> Result<(), I2C::Error> {
-        self.i2c.write(ADDR, &[self.pins_to_hex(pin_values)])?;
-        timer.delay_ms(delay);
-        Ok(())
-    }
-
+    /// Convert pin number to u8 bits
     pub fn pin_to_hex(&self, pin: u8) -> u8 {
-        2u8.pow((pin as u32) - 1)
+        2u8.pow(pin as u32)
     }
 
+    /// Join list of bits [1, ..., 1] -> 0b1...1. Input: P0...7, Output: P7...0
     pub fn pins_to_hex(&self, pins: &[u8]) -> u8 {
         // pins: Values for GPIOs 0, 1, 2, 3, 4, 5, 6, 7
         let value = pins.iter().enumerate().fold(0, |sum, (index, pin)| {
@@ -73,47 +72,28 @@ impl<I2C: I2c> GpioExpander<I2C> {
                 0
             }
         });
-        rprintln!("Pin register {:#} {:08b}", value, value.to_be());
         value.to_be()
     }
-}
-
-enum State {
-    LedOn,
-    LedOff,
 }
 
 #[entry]
 fn init() -> ! {
     rtt_init_print!();
-    let mut board = Board::take().unwrap();
+
+    let board = Board::take().unwrap();
     let mut timer: Timer<microbit::pac::TIMER0> = Timer::new(board.TIMER0);
 
-    //board.i2c_external
+    // Setup I2C two wire interface
     let i2c = twim::Twim::new(
         board.TWIM0,
         board.i2c_external.into(),
         twim::Frequency::K100,
     );
 
-    let mut gpio = GpioExpander::new(i2c);
+    // Setup gpio from expander
+    let mut expander_gpio = GpioExpander::new(i2c);
 
-    let mut state = State::LedOff;
-
-    #[cfg(test)]
-    {
-        assert_eq!(gpio.pin_to_hex(5), 0b0001_0000);
-        assert_eq!(gpio.pins_to_hex(&[0, 1, 1, 1, 0, 0, 0, 0]), 0b0000_1110);
-    }
-
-    /// Delay for specified milliseconds
-    macro_rules! d {
-        ($delay:expr) => {
-            timer.delay_ms($delay)
-        };
-    }
-
-    // Cycle though the colors
+    // Cycle though the colors on 3 pin rgb led (common +)
     fn cycle<T>(
         timer: &mut Timer<TIMER0>,
         pins: &[u8],
@@ -122,32 +102,31 @@ fn init() -> ! {
     where
         T: I2c,
     {
-        for (i, x) in pins.iter().enumerate() {
-            gpio.write(!x)?;
+        for (i, pin) in pins.iter().enumerate() {
+            // Write pins, inversed pulling low the specified pin
+            gpio.write(!pin)?;
             timer.delay_ms(500);
-            gpio.write(!x & !pins[(i + 1) % pins.len()])?;
+            // Write to current pin and next pin for color blend
+            gpio.write(!pin & !pins[(i + 1) % pins.len()])?;
             timer.delay_ms(500);
         }
         Ok(())
     }
 
     loop {
-        
-        match cycle(&mut timer, &[P4, P5, P6], &mut gpio) {
+        use pins::*;
+
+        // Cycle through colors
+        match cycle(&mut timer, &[P4, P5, P6], &mut expander_gpio) {
             Ok(()) => {}
-            Err(e) => { rprintln!("I2C failed {:?}", e) }
+            Err(e) => {
+                rprintln!("I2C failed {:?}", e)
+            }
         }
-        
+
         // gpio.write(!P6);
-        // d!(500);
-
         // gpio.write(!P6 & !P4);
-        // d!(500);
-
-        // gpio.write_pins_delay(&[1, 1, 1, 1, 1, 0, 1, 1], 100, &mut timer);
-
         // gpio.off();
-
         // timer.delay_ms(500);
     }
 }
